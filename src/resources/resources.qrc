@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>file-circle-plus-solid.png</file>
+    <file>upload-solid.png</file>
+    <file>folder-plus-solid.png</file>
+    <file>chart-simple-solid.png</file>
+  </qresource>
+  <qresource prefix="Img">
+    <file>fondo_oscuro.png</file>
+    <file>fondo.png</file>
+  </qresource>
+</RCC>
