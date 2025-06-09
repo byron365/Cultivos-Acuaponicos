@@ -22,7 +22,9 @@ def StructData(pn):
             "Prom": "",
             "mediana": None,
             "moda": None,
-            "varianza":None
+            "varianza":None,
+            "fechas":[],
+            "valores":[]
         },
         "temperaturaE": {
             "title": "Temperatura Estanque",
@@ -37,7 +39,9 @@ def StructData(pn):
             "Prom": "",
             "mediana": None,
             "moda": None,
-            "varianza":None
+            "varianza":None,
+            "fechas":[],
+            "valores":[]
         },
         "ph": {
             "title": "Ph",
@@ -53,7 +57,9 @@ def StructData(pn):
             "mediana": None,
             "moda": None,
             "varianza":None,
-            "type": ""
+            "type": "",
+            "fechas":[],
+            "valores":[]
         },
         "ppm": {
             "title": "PPM",
@@ -68,7 +74,9 @@ def StructData(pn):
             "Prom": "",
             "mediana": None,
             "moda": None,
-            "varianza":None
+            "varianza":None,
+            "fechas":[],
+            "valores":[]
         },
         "humedad": {
             "title": "Humedad",
@@ -83,7 +91,9 @@ def StructData(pn):
             "Prom": "",
             "mediana": None,
             "moda": None,
-            "varianza":None
+            "varianza":None,
+            "fechas":[],
+            "valores":[]
         },
         "luz": {
             "title": "Luz",
@@ -98,7 +108,9 @@ def StructData(pn):
             "Prom": "",
             "mediana": None,
             "moda": None,
-            "varianza":None
+            "varianza":None,
+            "fechas":[],
+            "valores":[]
         }
     }
     
@@ -125,6 +137,9 @@ def StructData(pn):
 
             varCalc = mediana(valor["valores"])#Caluculando varianza
             data[clave]["varianza"] = varCalc
+        
+            data[clave]["fechas"] = valor["fechas"]
+            data[clave]["valores"] = valor["valores"]
     return data
 
             

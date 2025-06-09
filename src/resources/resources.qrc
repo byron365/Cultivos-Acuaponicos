@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icon">
+    <file>aL.png</file>
+    <file>aR.png</file>
     <file>file-circle-plus-solid.png</file>
     <file>upload-solid.png</file>
     <file>folder-plus-solid.png</file>

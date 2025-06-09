@@ -1,11 +1,16 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget
-from PySide6.QtCore import Qt
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
+from PySide6.QtCore import Qt,QDateTime,QPointF, QMargins
+from PySide6.QtGui import QPainter,QBrush, QColor
 import sys, os
+from datetime import datetime
 from src.views.mainWindow import Ui_MainWindow
 from tools.structure import createProject, StructData
 from src.views.newProyectWindow import Ui_Form
 from src.views.dashWindow import Ui_FormDash
 from src.views.components.dataView import Ui_dataView
+from src.views.components.graph import Ui_lineGraph
+from typing import List, Dict, Union
 
 
 #------------------Clases para las subventanas--------------------------
@@ -22,7 +27,7 @@ class DashWindow(QWidget,Ui_FormDash):
         self.setupUi(self)
 
 #--------------------Clases para los componentes----------------------
-class DataView(QWidget, Ui_dataView):
+class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una variable
     def __init__(self,data):
         super().__init__()
         self.setupUi(self)
@@ -33,6 +38,7 @@ class DataView(QWidget, Ui_dataView):
         self.medLb.setTextFormat(Qt.TextFormat.RichText)
         self.modLb.setTextFormat(Qt.TextFormat.RichText)
         self.varLb.setTextFormat(Qt.TextFormat.RichText)
+        self.data = data
 
         #Añadiendo informacion
         self.Title.setText(data["title"])
@@ -43,7 +49,123 @@ class DataView(QWidget, Ui_dataView):
         self.modLb.setText(str(data["moda"]))
         self.varLb.setText(str(data["varianza"]))
 
+        #Cambiando grafica segun dia por medio de los botones
+        self.count = 0
+        self.fechasSeparadas = self.filtroDiaHora(data,"")
+        print(self.fechasSeparadas)
+        self.maxDateBtn.clicked.connect(self.changeMaxDate)
+        self.minDateBtn.clicked.connect(self.changeMinDate)
+
+        #Mostradno grafico
+        self.grafico = self.lineGraph(data,self.fechasSeparadas["fechas"][self.count])
+        self.graphView.addWidget(self.grafico)
+
         
+
+    def changeMaxDate(self,):
+        if self.count < len(self.fechasSeparadas):
+            self.count += 1
+            #Mostradno grafico
+            self.graphView.removeWidget(self.grafico)#Removemos el grafico anterior
+            self.grafico.deleteLater()
+            self.grafico = self.lineGraph(self.data,self.fechasSeparadas["fechas"][self.count])#Creamos el nuevo grafico
+            self.graphView.addWidget(self.grafico)#Loagregamos
+    
+    def changeMinDate(self):
+        if self.count > 0:
+            self.count -= 1    
+            #Mostradno grafico
+            self.graphView.removeWidget(self.grafico)#Removemos el grafico anterior
+            self.grafico.deleteLater()
+            self.grafico = self.lineGraph(self.data,self.fechasSeparadas["fechas"][self.count])#Creamos el nuevo grafico
+            self.graphView.addWidget(self.grafico)#Loagregamos
+
+    def lineGraph(self,data,objetivo):
+        #Todo: Creando el grafico en base a las horas y valores
+        #Filtrando fechas por dia especifico
+        datosFiltrados = self.filtroDiaHora(data,objetivo)
+
+        horas = datosFiltrados["tiempo"]
+        valores = datosFiltrados["valores"]
+
+        # Crear la serie
+        series = QLineSeries()
+
+        # Convertir las cadenas de tiempo a QDateTime y agregarlas a la serie
+        for t_str, valor in zip(horas, valores):
+            dt = QDateTime.fromString(t_str, "HH:mm:ss")
+            dt.setDate(QDateTime.currentDateTime().date())  # Asegurar una fecha válida
+            series.append(dt.toMSecsSinceEpoch(), valor)
+
+        # Crear el gráfico y añadir la serie
+        chart = QChart()
+        chart.addSeries(series)
+        chart.setTitle(f"Fecha: {objetivo}")
+
+        # Eje X (Tiempo)
+        axis_x = QDateTimeAxis()
+        axis_x.setFormat("HH:mm:ss")
+        axis_x.setTitleText("Tiempo")
+        axis_x.setTickCount(8)
+        chart.addAxis(axis_x, Qt.AlignBottom)
+        series.attachAxis(axis_x)
+
+        # Eje Y (Valores)
+        axis_y = QValueAxis()
+        axis_y.setTitleText("Valor")
+        axis_y.setTickCount(8)
+        chart.addAxis(axis_y, Qt.AlignLeft)
+        series.attachAxis(axis_y)
+
+        chart.setBackgroundVisible(False)          # Quita fondo general
+        chart.setBackgroundBrush(Qt.transparent)   # Fondo transparente
+        chart.setPlotAreaBackgroundVisible(False)  # Quita fondo del área de dibujo
+
+
+        # Crear la vista del gráfico
+        chart.legend().hide()#Quita la leyenda
+        chart.setMargins(QMargins(0, 0, 0, 0))#Quita los margenes
+        chart_view = QChartView(chart)
+        return chart_view
+       
+    
+    #Funcion para filtrar fechas por dia, obteniendo como se comporta los valores cada hora
+    def filtroDiaHora(self,data, objetivo):
+        fechas = data["fechas"]
+        valores = data["valores"]
+        tiemposHora =[]
+        tiempos = []
+        valorEnTiempo = []
+        fechasFiltradas = []
+        
+        #Separando fechas repetidas
+        for f in fechas:
+            if not f[0:10] in fechasFiltradas and not "fecha_" in f[0:10]:
+                fechasFiltradas.append(f[0:10])
+                #print(f[0:10])
+
+        #Filtrando fechas segun objetivo
+        for i, f in enumerate(fechas):
+            if f[0:10] == objetivo and not "fecha_" in f[0:10]:
+               if not f[11:13] in tiemposHora:#Filtrando por hora minutos
+                tiemposHora.append(f[11:13])
+                tiempos.append(f[11:19])
+                valorEnTiempo.append(round(float(valores[i]),2))
+                #print(f"{f[0:10]} --- {f[11:13]}---{f[11:19]}---{round(float(valores[i]),2)}")
+        
+        return {
+            "tiempo": tiempos,
+            "valores": valorEnTiempo,
+            "fechas": fechasFiltradas
+        }
+
+
+
+
+
+
+
+
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
