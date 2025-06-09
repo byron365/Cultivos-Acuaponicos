@@ -7,22 +7,21 @@
     <x>0</x>
     <y>0</y>
     <width>550</width>
-    <height>425</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>600</width>
-    <height>450</height>
+    <height>500</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget{
+   <string notr="true">QWidget, #graphView{
 	border-radius: 10px;
-	padding: 5px;
 	color: &quot;white&quot;;
 }
 #graphCtn{
@@ -37,6 +36,9 @@
 
 #widget_3{
 	background-color: #1abc9c;
+}
+QPushButton{
+	background-color: #e67e22;
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -45,58 +47,167 @@
      <item>
       <widget class="QWidget" name="graphCtn" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
-         <widget class="QLabel" name="Title">
+         <widget class="QWidget" name="horizontalWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>45</height>
+            <height>50</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <pointsize>22</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LayoutDirection::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>TITLE</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="minDateBtn">
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="cursor">
+              <cursorShape>PointingHandCursor</cursorShape>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../resources/resources.qrc">
+               <normaloff>:/icon/aL.png</normaloff>:/icon/aL.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="Title">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>17</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>TITLE</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="maxDateBtn">
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="cursor">
+              <cursorShape>PointingHandCursor</cursorShape>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../resources/resources.qrc">
+               <normaloff>:/icon/aR.png</normaloff>:/icon/aR.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QWidget" name="graphView" native="true">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>200</height>
-           </size>
+         <layout class="QVBoxLayout" name="graphView">
+          <property name="spacing">
+           <number>0</number>
           </property>
-         </widget>
+         </layout>
         </item>
         <item>
          <widget class="QWidget" name="horizontalWidget_2" native="true">
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>100</height>
+            <height>65</height>
            </size>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <widget class="QWidget" name="widget_7" native="true">
              <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
                <widget class="QLabel" name="label">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>9</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -110,9 +221,15 @@
               </item>
               <item>
                <widget class="QLabel" name="maxLb">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>13</pointsize>
+                  <pointsize>9</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -132,9 +249,15 @@
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
                <widget class="QLabel" name="label_4">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>9</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -148,9 +271,15 @@
               </item>
               <item>
                <widget class="QLabel" name="promLb">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>13</pointsize>
+                  <pointsize>9</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -170,9 +299,15 @@
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
                <widget class="QLabel" name="label_5">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>9</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -186,9 +321,15 @@
               </item>
               <item>
                <widget class="QLabel" name="minLb">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>13</pointsize>
+                  <pointsize>9</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -214,10 +355,25 @@
        <property name="maximumSize">
         <size>
          <width>600</width>
-         <height>100</height>
+         <height>75</height>
         </size>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>10</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QWidget" name="widget_2" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -225,7 +381,7 @@
             <widget class="QLabel" name="label_7">
              <property name="font">
               <font>
-               <pointsize>12</pointsize>
+               <pointsize>9</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -241,7 +397,7 @@
             <widget class="QLabel" name="medLb">
              <property name="font">
               <font>
-               <pointsize>13</pointsize>
+               <pointsize>9</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -263,7 +419,7 @@
             <widget class="QLabel" name="label_9">
              <property name="font">
               <font>
-               <pointsize>12</pointsize>
+               <pointsize>10</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -279,7 +435,7 @@
             <widget class="QLabel" name="modLb">
              <property name="font">
               <font>
-               <pointsize>13</pointsize>
+               <pointsize>9</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -301,7 +457,7 @@
             <widget class="QLabel" name="label_11">
              <property name="font">
               <font>
-               <pointsize>12</pointsize>
+               <pointsize>10</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -317,7 +473,7 @@
             <widget class="QLabel" name="varLb">
              <property name="font">
               <font>
-               <pointsize>13</pointsize>
+               <pointsize>9</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -339,6 +495,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
