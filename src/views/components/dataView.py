@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dataViewwepTWX.ui'
+## Form generated from reading UI file 'dataViewQQuLBN.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.1
 ##
@@ -24,6 +24,7 @@ class Ui_dataView(object):
         if not Main.objectName():
             Main.setObjectName(u"Main")
         Main.resize(550, 500)
+        Main.setMinimumSize(QSize(0, 500))
         Main.setMaximumSize(QSize(600, 500))
         Main.setStyleSheet(u"QWidget, #graphView{\n"
 "	border-radius: 10px;\n"

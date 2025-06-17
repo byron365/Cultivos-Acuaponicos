@@ -135,7 +135,7 @@ def StructData(pn):
             modaCalc = moda(valor["valores"])#Caluculando moda
             data[clave]["moda"] = modaCalc
 
-            varCalc = mediana(valor["valores"])#Caluculando varianza
+            varCalc = varianza(valor["valores"])#Caluculando varianza
             data[clave]["varianza"] = varCalc
         
             data[clave]["fechas"] = valor["fechas"]

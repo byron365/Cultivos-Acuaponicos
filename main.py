@@ -1,15 +1,15 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget, QDockWidget
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
-from PySide6.QtCore import Qt,QDateTime,QPointF, QMargins
+from PySide6.QtCore import Qt,QDateTime,QPointF, QMargins, QSize
 from PySide6.QtGui import QPainter,QBrush, QColor
 import sys, os
 from datetime import datetime
-from src.views.mainWindow import Ui_MainWindow
 from tools.structure import createProject, StructData
 from src.views.newProyectWindow import Ui_Form
 from src.views.dashWindow import Ui_FormDash
 from src.views.components.dataView import Ui_dataView
 from src.views.components.graph import Ui_lineGraph
+from src.views.mainWindow import Ui_MainWindow
 from typing import List, Dict, Union
 
 
@@ -25,6 +25,8 @@ class DashWindow(QWidget,Ui_FormDash):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+
+        
 
 #--------------------Clases para los componentes----------------------
 class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una variable
@@ -52,7 +54,7 @@ class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una
         #Cambiando grafica segun dia por medio de los botones
         self.count = 0
         self.fechasSeparadas = self.filtroDiaHora(data,"")
-        print(self.fechasSeparadas)
+        #print(self.fechasSeparadas)
         self.maxDateBtn.clicked.connect(self.changeMaxDate)
         self.minDateBtn.clicked.connect(self.changeMinDate)
 
@@ -131,8 +133,22 @@ class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una
     
     #Funcion para filtrar fechas por dia, obteniendo como se comporta los valores cada hora
     def filtroDiaHora(self,data, objetivo):
-        fechas = data["fechas"]
-        valores = data["valores"]
+        fechas = data["fechas"][1:]
+        valores = data["valores"][1:]
+        datos = []
+        control = False
+        for d in valores:
+            try:
+                float(d)
+                control = True
+            except:
+                control = False
+
+            if control:
+                datos.append(float(d))
+            else:
+                datos.append(0)
+        
         tiemposHora =[]
         tiempos = []
         valorEnTiempo = []
@@ -150,7 +166,8 @@ class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una
                if not f[11:13] in tiemposHora:#Filtrando por hora minutos
                 tiemposHora.append(f[11:13])
                 tiempos.append(f[11:19])
-                valorEnTiempo.append(round(float(valores[i]),2))
+                valorEnTiempo.append(round(datos[i],2))
+                #print(f"datos:  {datos[i]} fechas: {len(fechas)} valores: {len(valores)}")
                 #print(f"{f[0:10]} --- {f[11:13]}---{f[11:19]}---{round(float(valores[i]),2)}")
         
         return {
@@ -158,17 +175,10 @@ class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una
             "valores": valorEnTiempo,
             "fechas": fechasFiltradas
         }
+        
+        
 
-
-
-
-
-
-
-
-
-
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow,Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -176,6 +186,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #Eventos de botones
         self.createBtn.clicked.connect(self.openNewP)
         self.RecentBtn.clicked.connect(self.openRecentP)
+
+
+        
 
     def openNewP(self):
         #Funcion para crear dashboards
@@ -198,29 +211,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def dashBoardCreate(self):#Funcion que evalua si se puede crear el dashboard al precionar el boton
         projectName = self.createWindow.nameLE.text()
-        if not projectName.strip():
+        if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
             QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
         else:
             paths = [self.createWindow.LeTa.text(), self.createWindow.LeTe.text(),
                  self.createWindow.LePh.text(),self.createWindow.LePpm.text(),
                  self.createWindow.LeHum.text(),self.createWindow.LeLuz.text()]
-            result = createProject(projectName,paths)
+            
+            self.valido = False
 
-            if result['type'] == 'SUCCESS':
-                #Abriendo dashboard
-                self.dashWindow = DashWindow()
+            for p in paths:#Filtrando, si alguna url no se encuentra vacia se puede crear el dashboard
+                if p.strip():
+                    self.valido = True
+                    break
 
-                #Estructurando datos para enviarlos al dashWindow
-                data = StructData(projectName)
+           
+            if self.valido:
+                result = createProject(projectName,paths)
 
-                #Agregando componentes al dashWindow
-                for de,val in data.items():
-                    if val["Max"]["valor"]:
-                        self.dashWindow.centralCtn.addWidget(DataView(val))
-                self.dashWindow.show()
-                self.createWindow.close() #Cerrando ventana de proyectos
-            elif result['type'] == "WARNING":
-                QMessageBox.warning(self,"Ocurrio un error", result['msg'])
+                if result['type'] == 'SUCCESS':
+                    #Abriendo dashboard
+                    self.dashWindow = DashWindow()
+
+                    #Estructurando datos para enviarlos al dashWindow
+                    data = StructData(projectName)
+
+                    #Agregando componentes al dashWindow
+                    for de,val in data.items():
+                        if val["Max"]["valor"]:
+                            self.dashWindow.centralCtn.addWidget(DataView(val))#Agregando informacion basica
+                    self.dashWindow.show()
+                    self.createWindow.close() #Cerrando ventana de proyectos
+                elif result['type'] == "WARNING":
+                    QMessageBox.warning(self,"Ocurrio un error", result['msg'])
+            else:
+                QMessageBox.warning(self,"Rutas invalidadas", "Las rutas a los archivos .csv se encuentran vacías")
 
 
     def searchPath1(self):
@@ -248,6 +273,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.createWindow.LeLuz.setText(ruta[0])
 
 
+    def docksCreate(self,title): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
+        dock = QDockWidget()
+        dock.setWindowTitle(title)
+        dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        dock.resize(200,100)
+        dock.setMinimumSize(QSize(200, 100))
+        dock.setMaximumSize(QSize(200, 100))
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea|Qt.DockWidgetArea.RightDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea,dock)#anadiendo dock
+        
 
        
 

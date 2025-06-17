@@ -174,7 +174,19 @@ def mayor_dato(dataList, dateList):
     if not dataList:
         return "Por favor ingresa una lista valida!"
     
-    maxNum = max(dataList[1:])
+    datos = []
+    control = False
+    for d in dataList[1:]:
+        try:
+            float(d)
+            control = True
+        except:
+            control = False
+
+        if control:
+            datos.append(float(d))
+    
+    maxNum = max(datos)
     # Buscar todos los índices donde aparece el valor
     indices = [i for i, val in enumerate(dataList) if val == maxNum]
 
@@ -191,7 +203,19 @@ def menor_dato(dataList, dateList):
     if not dataList:
         return "Por favor ingresa una lista valida!"
     
-    minNum = min(dataList[1:])
+    datos = []
+    control = False
+    for d in dataList[1:]:
+        try:
+            float(d)
+            control = True
+        except:
+            control = False
+
+        if control:
+            datos.append(float(d))
+
+    minNum = min(datos)
     # Buscar todos los índices donde aparece el valor
     indices = [i for i, val in enumerate(dataList) if val == minNum]
 
@@ -200,7 +224,7 @@ def menor_dato(dataList, dateList):
 
     return {
         "fecha": fechas,
-        "valor" : round(float(minNum),2)
+        "valor" : round(minNum,2)
     }
 
 #Funcion para dar el valor promedio de una lista
@@ -234,7 +258,20 @@ def mediana(lista):
     if not lista:
         return 0
     else:
-        ordenada = sorted(lista) #Ordenando de menor a mayor
+        datos = []
+        control = False
+        for d in lista[1:]:
+            try:
+                float(d)
+                control = True
+            except:
+                control = False
+
+            if control:
+                datos.append(float(d))
+
+
+        ordenada = sorted(datos) #Ordenando de menor a mayor
         n = len(ordenada)
         if n % 2 == 0: #n es par, la mediana es el promedio de los 2 números centrales
             med = (float(ordenada[int(n/2)]) + float(ordenada[int((n/2)) - 1])) / 2
@@ -246,8 +283,20 @@ def moda(lista):
     if not lista:
         return 0
     else:
+        datos = []
+        control = False
+        for d in lista[1:]:
+            try:
+                float(d)
+                control = True
+            except:
+                control = False
+
+            if control:
+                datos.append(float(d))
+                
         # Contamos la frecuencia de cada elemento
-        frecuencias = Counter(lista)
+        frecuencias = Counter(datos)
 
         # Obtenemos la frecuencia máxima
         max_frecuencia = max(frecuencias.values())
@@ -266,8 +315,20 @@ def varianza(lista):
     if len(lista) == 0:
         return 0  # Evita división entre cero
     else:
-        media = sum(lista) / len(lista)
-        suma_cuadrados = sum((x - media) ** 2 for x in lista)
-        varianza = suma_cuadrados / len(lista)  # Para población completa
+        datos = []
+        control = False
+        for d in lista[1:]:
+            try:
+                float(d)
+                control = True
+            except:
+                control = False
+
+            if control:
+                datos.append(float(d))
+                
+        media = sum(datos) / len(datos)
+        suma_cuadrados = sum((x - media) ** 2 for x in datos)
+        varianza = suma_cuadrados / len(datos)  # Para población completa
 
         return round(varianza,2)
