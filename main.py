@@ -5,17 +5,18 @@ from PySide6.QtGui import QPainter,QBrush, QColor
 import sys, os
 from datetime import datetime
 from tools.structure import createProject, StructData
-from src.views.newProyectWindow import Ui_Form
+from src.views.newProyectWindow import Ui_newProyectView
 from src.views.dashWindow import Ui_FormDash
 from src.views.components.dataView import Ui_dataView
 from src.views.components.graph import Ui_lineGraph
 from src.views.mainWindow import Ui_MainWindow
+from src.views.mainCtn import Ui_mainCtn
 from typing import List, Dict, Union
 
 
-#------------------Clases para las subventanas--------------------------
+#------------------Clases para las vistas--------------------------
 #Clase de la ventana de Crear proyecto nuevo
-class NewProyectWindow(QWidget,Ui_Form):
+class NewProyectWindow(QWidget,Ui_newProyectView):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -26,7 +27,10 @@ class DashWindow(QWidget,Ui_FormDash):
         super().__init__()
         self.setupUi(self)
 
-        
+class MainCtn(QWidget, Ui_mainCtn):#Componente para mostrar el contenido inicial del programa
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
 
 #--------------------Clases para los componentes----------------------
 class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una variable
@@ -183,12 +187,12 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
+        self.mainCtn = MainCtn()#Contenido inicial, al comenzar el programa
         #Eventos de botones
-        self.createBtn.clicked.connect(self.openNewP)
-        self.RecentBtn.clicked.connect(self.openRecentP)
+        self.mainCtn.createBtn.clicked.connect(self.openNewP)
+        self.mainCtn.RecentBtn.clicked.connect(self.openRecentP)
+        self.centralCtn.addWidget(self.mainCtn)
 
-
-        
 
     def openNewP(self):
         #Funcion para crear dashboards

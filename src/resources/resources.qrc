@@ -8,7 +8,6 @@
     <file>chart-simple-solid.png</file>
   </qresource>
   <qresource prefix="Img">
-    <file>fondo_oscuro.png</file>
-    <file>fondo.png</file>
+    <file>bg.png</file>
   </qresource>
 </RCC>

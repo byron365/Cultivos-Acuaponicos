@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit,
     QWidget)
 from src.resources import resources_rc
 
-class Ui_Form(object):
+class Ui_newProyectView(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
