@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'DashboardCxAcGP.ui'
+## Form generated from reading UI file 'DashboarduYVqnG.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.1
 ##
@@ -22,7 +22,11 @@ class Ui_FormDash(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(640, 480)
+        Form.resize(640, 1000)
+        Form.setMaximumSize(QSize(640, 1000))
+        Form.setStyleSheet(u"#scrollArea{\n"
+"	border-radius:10px;\n"
+"}")
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.scrollArea = QScrollArea(Form)
@@ -30,7 +34,8 @@ class Ui_FormDash(object):
         self.scrollArea.setWidgetResizable(True)
         self.ctn = QWidget()
         self.ctn.setObjectName(u"ctn")
-        self.ctn.setGeometry(QRect(0, 0, 620, 460))
+        self.ctn.setGeometry(QRect(0, 0, 622, 462))
+        self.ctn.setStyleSheet(u"")
         self.verticalLayout_3 = QVBoxLayout(self.ctn)
         self.verticalLayout_3.setSpacing(0)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")

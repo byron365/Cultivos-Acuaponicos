@@ -22,7 +22,7 @@ class NewProyectWindow(QWidget,Ui_centralCtn):
         self.setupUi(self)
 
 #Clase para la ventana de Dashboard
-class DashWindow(QWidget,Ui_FormDash):
+class DashView(QWidget,Ui_FormDash):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -240,17 +240,24 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
                 if result['type'] == 'SUCCESS':
                     #Abriendo dashboard
-                    self.dashWindow = DashWindow()
+                    self.dashView = DashView()
+                    self.centralCtn.removeWidget(self.createView)#Eliminado contenido inicial
+                    self.createView.setParent(None)
+                    self.createView.deleteLater()
+                    self.centralCtn.addWidget(self.dashView)#Agregando contenido de la vista de crear dashboard
+                    self.showMaximized()#Se coloca la ventana al ancho de la pantalla
+                    self.setWindowTitle(f"Cultivos Acuaponicos - [{projectName}]")
 
-                    #Estructurando datos para enviarlos al dashWindow
+                    #Estructurando datos para enviarlos al dashView
                     data = StructData(projectName)
 
-                    #Agregando componentes al dashWindow
+                    #Agregando componentes al dashView
                     for de,val in data.items():
                         if val["Max"]["valor"]:
-                            self.dashWindow.centralCtn.addWidget(DataView(val))#Agregando informacion basica
-                    self.dashWindow.show()
-                    self.createView.close() #Cerrando ventana de proyectos
+                            self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
+
+                    #Creando dokcs
+                    self.docksCreate("Test")
                 elif result['type'] == "WARNING":
                     QMessageBox.warning(self,"Ocurrio un error", result['msg'])
             else:
@@ -286,9 +293,9 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         dock = QDockWidget()
         dock.setWindowTitle(title)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        dock.resize(200,100)
-        dock.setMinimumSize(QSize(200, 100))
-        dock.setMaximumSize(QSize(200, 100))
+        dock.resize(400,100)
+        dock.setMinimumSize(QSize(400, 100))
+        dock.setMaximumSize(QSize(400, 100))
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea|Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(Qt.LeftDockWidgetArea,dock)#anadiendo dock
