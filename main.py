@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget, QDockWidget
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
+import random
 from PySide6.QtCore import Qt,QDateTime,QPointF, QMargins, QSize
 from PySide6.QtGui import QPainter,QBrush, QColor
 import sys, os
@@ -247,6 +248,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     self.centralCtn.addWidget(self.dashView)#Agregando contenido de la vista de crear dashboard
                     self.showMaximized()#Se coloca la ventana al ancho de la pantalla
                     self.setWindowTitle(f"Cultivos Acuaponicos - [{projectName}]")
+                    dockTitle = ""
 
                     #Estructurando datos para enviarlos al dashView
                     data = StructData(projectName)
@@ -255,10 +257,15 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     for de,val in data.items():
                         if val["Max"]["valor"]:
                             self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
-                            #Creando dokcs
                     
-                    self.addDockWidget(Qt.LeftDockWidgetArea,self.docksCreate(projectName,data))#anadiendo dock
+                    #Creando dokcs
+                    #Filtrando informacion para construir los graficos de los docks
+                    if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
+                        print("Tenemos ambas temperaturas")
+                        dockTitle = f"{data["temperaturaA"]["title"]} VS {data["humedad"]["valores"]}"
+                        self.addDockWidget(Qt.LeftDockWidgetArea,self.docksCreate(dockTitle,[random.randint(0, 100) for _ in range(10)],[random.randint(0, 100) for _ in range(10)]))#anadiendo dock
                     
+                    #No hay grafico para mostrar
                 elif result['type'] == "WARNING":
                     QMessageBox.warning(self,"Ocurrio un error", result['msg'])
             else:
@@ -290,7 +297,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.createView.LeLuz.setText(ruta[0])
 
 
-    def docksCreate(self,title, data): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
+    def docksCreate(self,title, data1,data2): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
         dock = QDockWidget()
         dock.setWindowTitle(title)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -299,25 +306,30 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         dock.setMaximumSize(QSize(400, 100))
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea|Qt.DockWidgetArea.RightDockWidgetArea)
+        grafico = self.crear_grafico_doble_serie(data1,data2,title)
+        dock.setWidget(grafico)
 
-        #Filtrando informacion para construir los graficos
-        if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
-            print("Tenemos ambas temperaturas")
+        
         
 
         
         return dock
         
-    def crear_grafico_doble_serie(lista1, lista2, titulo="Gráfico de 2 series") -> QChartView:
+    def crear_grafico_doble_serie(self,lista1, lista2, titulo) -> QChartView:
+        #datos1 = self.convertirANumero(lista1)
+        #datos2 = self.convertirANumero(lista2)
+        datos1 = [random.randint(0, 100) for _ in range(10)]
+        datos2 = [random.randint(0, 100) for _ in range(10)]
+        
         # Crear series
         serie1 = QLineSeries()
         serie1.setName("Serie 1")
-        for i, valor in enumerate(lista1):
+        for i, valor in enumerate(datos1):
             serie1.append(QPointF(i, valor))
 
         serie2 = QLineSeries()
         serie2.setName("Serie 2")
-        for i, valor in enumerate(lista2):
+        for i, valor in enumerate(datos2):
             serie2.append(QPointF(i, valor))
 
         # Crear el gráfico y agregar las series
@@ -331,9 +343,27 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         # Crear vista del gráfico
         chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.Antialiasing)
+        print("Termino de procesar el grafico del dock")
 
         return chart_view
-       
+    
+    def convertirANumero(self,lista):
+        valores1 = lista[1:]
+        datos1 = []
+        control1 = False
+        for d in valores1:
+            try:
+                float(d)
+                control1 = True
+            except:
+                control1 = False
+
+            if control1:
+                datos1.append(float(d))
+            else:
+                datos1.append(0)
+        
+        return datos1
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
