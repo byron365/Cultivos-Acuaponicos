@@ -5,8 +5,8 @@ from PySide6.QtGui import QPainter,QBrush, QColor
 import sys, os
 from datetime import datetime
 from tools.structure import createProject, StructData
-from src.views.newProyectWindow import Ui_newProyectView
-from src.views.dashWindow import Ui_FormDash
+from src.views.newProyectView import Ui_centralCtn
+from src.views.dashView import Ui_FormDash
 from src.views.components.dataView import Ui_dataView
 from src.views.components.graph import Ui_lineGraph
 from src.views.mainWindow import Ui_MainWindow
@@ -16,7 +16,7 @@ from typing import List, Dict, Union
 
 #------------------Clases para las vistas--------------------------
 #Clase de la ventana de Crear proyecto nuevo
-class NewProyectWindow(QWidget,Ui_newProyectView):
+class NewProyectWindow(QWidget,Ui_centralCtn):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -186,6 +186,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.setWindowTitle("Cultivos Acuaponicos")
 
         self.mainCtn = MainCtn()#Contenido inicial, al comenzar el programa
         #Eventos de botones
@@ -196,31 +197,35 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
     def openNewP(self):
         #Funcion para crear dashboards
-        self.createWindow = NewProyectWindow()
-        self.createWindow.show()
+        self.createView = NewProyectWindow()
+        self.centralCtn.removeWidget(self.mainCtn)#Eliminado contenido inicial
+        self.mainCtn.setParent(None)
+        self.mainCtn.deleteLater()
+        self.centralCtn.addWidget(self.createView)#Agregando contenido de la vista de crear dashboard
+        self.resize(780,650)
+        self.setWindowTitle("Cultivos Acuaponicos - Nuevo Proyecto")
 
-        self.createWindow.createDashBtn.clicked.connect(self.dashBoardCreate)
+        self.createView.createDashBtn.clicked.connect(self.dashBoardCreate)
 
         #Botones para buscar archivos
-        self.createWindow.fTaBtn.clicked.connect(self.searchPath1)
-        self.createWindow.fTeBtn.clicked.connect(self.searchPath2)
-        self.createWindow.fPhBtn.clicked.connect(self.searchPath3)
-        self.createWindow.fPpmBtn.clicked.connect(self.searchPath4)
-        self.createWindow.fHumBtn.clicked.connect(self.searchPath5)
-        self.createWindow.fLuzBtn.clicked.connect(self.searchPath6)
-        self.close()
+        self.createView.fTaBtn.clicked.connect(self.searchPath1)
+        self.createView.fTeBtn.clicked.connect(self.searchPath2)
+        self.createView.fPhBtn.clicked.connect(self.searchPath3)
+        self.createView.fPpmBtn.clicked.connect(self.searchPath4)
+        self.createView.fHumBtn.clicked.connect(self.searchPath5)
+        self.createView.fLuzBtn.clicked.connect(self.searchPath6)
 
     def openRecentP(self):
         print("Abriendo proyecto reciente")
 
     def dashBoardCreate(self):#Funcion que evalua si se puede crear el dashboard al precionar el boton
-        projectName = self.createWindow.nameLE.text()
+        projectName = self.createView.nameLE.text()
         if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
             QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
         else:
-            paths = [self.createWindow.LeTa.text(), self.createWindow.LeTe.text(),
-                 self.createWindow.LePh.text(),self.createWindow.LePpm.text(),
-                 self.createWindow.LeHum.text(),self.createWindow.LeLuz.text()]
+            paths = [self.createView.LeTa.text(), self.createView.LeTe.text(),
+                 self.createView.LePh.text(),self.createView.LePpm.text(),
+                 self.createView.LeHum.text(),self.createView.LeLuz.text()]
             
             self.valido = False
 
@@ -245,7 +250,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                         if val["Max"]["valor"]:
                             self.dashWindow.centralCtn.addWidget(DataView(val))#Agregando informacion basica
                     self.dashWindow.show()
-                    self.createWindow.close() #Cerrando ventana de proyectos
+                    self.createView.close() #Cerrando ventana de proyectos
                 elif result['type'] == "WARNING":
                     QMessageBox.warning(self,"Ocurrio un error", result['msg'])
             else:
@@ -254,27 +259,27 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
     def searchPath1(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
-        self.createWindow.LeTa.setText(ruta[0])
+        self.createView.LeTa.setText(ruta[0])
     
     def searchPath2(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
-        self.createWindow.LeTe.setText(ruta[0])
+        self.createView.LeTe.setText(ruta[0])
     
     def searchPath3(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
-        self.createWindow.LePh.setText(ruta[0])
+        self.createView.LePh.setText(ruta[0])
 
     def searchPath4(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
-        self.createWindow.LePpm.setText(ruta[0])
+        self.createView.LePpm.setText(ruta[0])
 
     def searchPath5(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
-        self.createWindow.LeHum.setText(ruta[0])
+        self.createView.LeHum.setText(ruta[0])
 
     def searchPath6(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
-        self.createWindow.LeLuz.setText(ruta[0])
+        self.createView.LeLuz.setText(ruta[0])
 
 
     def docksCreate(self,title): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
