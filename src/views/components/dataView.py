@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dataViewQQuLBN.ui'
+## Form generated from reading UI file 'dataViewBZMciS.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.1
 ##
@@ -19,14 +19,17 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
     QSizePolicy, QVBoxLayout, QWidget)
 from src.resources import resources_rc
 
-class Ui_dataView(object):
-    def setupUi(self, Main):
-        if not Main.objectName():
-            Main.setObjectName(u"Main")
-        Main.resize(550, 500)
-        Main.setMinimumSize(QSize(0, 500))
-        Main.setMaximumSize(QSize(600, 500))
-        Main.setStyleSheet(u"QWidget, #graphView{\n"
+class Ui_DataView(object):
+    def setupUi(self, DataView):
+        if not DataView.objectName():
+            DataView.setObjectName(u"DataView")
+        DataView.resize(550, 500)
+        DataView.setMinimumSize(QSize(0, 500))
+        DataView.setMaximumSize(QSize(600, 500))
+        DataView.setStyleSheet(u"#Main{\n"
+"	background-color: rgba(0,0,0,0);\n"
+"}\n"
+"QWidget, #graphView{\n"
 "	border-radius: 10px;\n"
 "	color: \"white\";\n"
 "}\n"
@@ -45,12 +48,17 @@ class Ui_dataView(object):
 "}\n"
 "QPushButton{\n"
 "	background-color: #e67e22;\n"
-"}")
-        self.verticalLayout_2 = QVBoxLayout(Main)
+"}\n"
+"")
+        self.verticalLayout_2 = QVBoxLayout(DataView)
+        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.allCtn = QWidget(DataView)
+        self.allCtn.setObjectName(u"allCtn")
+        self.verticalLayout = QVBoxLayout(self.allCtn)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.graphCtn = QWidget(Main)
+        self.graphCtn = QWidget(self.allCtn)
         self.graphCtn.setObjectName(u"graphCtn")
         self.verticalLayout_3 = QVBoxLayout(self.graphCtn)
         self.verticalLayout_3.setSpacing(0)
@@ -191,13 +199,13 @@ class Ui_dataView(object):
 
         self.verticalLayout.addWidget(self.graphCtn)
 
-        self.horizontalWidget1 = QWidget(Main)
+        self.horizontalWidget1 = QWidget(self.allCtn)
         self.horizontalWidget1.setObjectName(u"horizontalWidget1")
         self.horizontalWidget1.setMaximumSize(QSize(600, 75))
         self.horizontalLayout = QHBoxLayout(self.horizontalWidget1)
         self.horizontalLayout.setSpacing(10)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setContentsMargins(0, 10, 0, 0)
         self.widget_2 = QWidget(self.horizontalWidget1)
         self.widget_2.setObjectName(u"widget_2")
         self.verticalLayout_7 = QVBoxLayout(self.widget_2)
@@ -268,30 +276,30 @@ class Ui_dataView(object):
         self.verticalLayout.addWidget(self.horizontalWidget1)
 
 
-        self.verticalLayout_2.addLayout(self.verticalLayout)
+        self.verticalLayout_2.addWidget(self.allCtn)
 
 
-        self.retranslateUi(Main)
+        self.retranslateUi(DataView)
 
-        QMetaObject.connectSlotsByName(Main)
+        QMetaObject.connectSlotsByName(DataView)
     # setupUi
 
-    def retranslateUi(self, Main):
-        Main.setWindowTitle(QCoreApplication.translate("Main", u"Form", None))
+    def retranslateUi(self, DataView):
+        DataView.setWindowTitle(QCoreApplication.translate("DataView", u"Form", None))
         self.minDateBtn.setText("")
-        self.Title.setText(QCoreApplication.translate("Main", u"TITLE", None))
+        self.Title.setText(QCoreApplication.translate("DataView", u"TITLE", None))
         self.maxDateBtn.setText("")
-        self.label.setText(QCoreApplication.translate("Main", u"MAX", None))
-        self.maxLb.setText(QCoreApplication.translate("Main", u"100", None))
-        self.label_4.setText(QCoreApplication.translate("Main", u"PROM", None))
-        self.promLb.setText(QCoreApplication.translate("Main", u"50", None))
-        self.label_5.setText(QCoreApplication.translate("Main", u"MIN", None))
-        self.minLb.setText(QCoreApplication.translate("Main", u"0", None))
-        self.label_7.setText(QCoreApplication.translate("Main", u"MEDIANA", None))
-        self.medLb.setText(QCoreApplication.translate("Main", u"100", None))
-        self.label_9.setText(QCoreApplication.translate("Main", u"MODA", None))
-        self.modLb.setText(QCoreApplication.translate("Main", u"100", None))
-        self.label_11.setText(QCoreApplication.translate("Main", u"VARIANZA", None))
-        self.varLb.setText(QCoreApplication.translate("Main", u"100", None))
+        self.label.setText(QCoreApplication.translate("DataView", u"MAX", None))
+        self.maxLb.setText(QCoreApplication.translate("DataView", u"100", None))
+        self.label_4.setText(QCoreApplication.translate("DataView", u"PROM", None))
+        self.promLb.setText(QCoreApplication.translate("DataView", u"50", None))
+        self.label_5.setText(QCoreApplication.translate("DataView", u"MIN", None))
+        self.minLb.setText(QCoreApplication.translate("DataView", u"0", None))
+        self.label_7.setText(QCoreApplication.translate("DataView", u"MEDIANA", None))
+        self.medLb.setText(QCoreApplication.translate("DataView", u"100", None))
+        self.label_9.setText(QCoreApplication.translate("DataView", u"MODA", None))
+        self.modLb.setText(QCoreApplication.translate("DataView", u"100", None))
+        self.label_11.setText(QCoreApplication.translate("DataView", u"VARIANZA", None))
+        self.varLb.setText(QCoreApplication.translate("DataView", u"100", None))
     # retranslateUi
 

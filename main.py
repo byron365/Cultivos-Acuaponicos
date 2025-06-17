@@ -7,7 +7,7 @@ from datetime import datetime
 from tools.structure import createProject, StructData
 from src.views.newProyectView import Ui_centralCtn
 from src.views.dashView import Ui_FormDash
-from src.views.components.dataView import Ui_dataView
+from src.views.components.dataView import Ui_DataView
 from src.views.components.graph import Ui_lineGraph
 from src.views.mainWindow import Ui_MainWindow
 from src.views.mainCtn import Ui_mainCtn
@@ -33,7 +33,7 @@ class MainCtn(QWidget, Ui_mainCtn):#Componente para mostrar el contenido inicial
         self.setupUi(self)
 
 #--------------------Clases para los componentes----------------------
-class DataView(QWidget, Ui_dataView):#Componente para mostrar informacion de una variable
+class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una variable
     def __init__(self,data):
         super().__init__()
         self.setupUi(self)
@@ -255,9 +255,10 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     for de,val in data.items():
                         if val["Max"]["valor"]:
                             self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
-
-                    #Creando dokcs
-                    self.docksCreate("Test")
+                            #Creando dokcs
+                    
+                    self.addDockWidget(Qt.LeftDockWidgetArea,self.docksCreate(projectName,data))#anadiendo dock
+                    
                 elif result['type'] == "WARNING":
                     QMessageBox.warning(self,"Ocurrio un error", result['msg'])
             else:
@@ -289,7 +290,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.createView.LeLuz.setText(ruta[0])
 
 
-    def docksCreate(self,title): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
+    def docksCreate(self,title, data): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
         dock = QDockWidget()
         dock.setWindowTitle(title)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -298,9 +299,40 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         dock.setMaximumSize(QSize(400, 100))
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea|Qt.DockWidgetArea.RightDockWidgetArea)
-        self.addDockWidget(Qt.LeftDockWidgetArea,dock)#anadiendo dock
+
+        #Filtrando informacion para construir los graficos
+        if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
+            print("Tenemos ambas temperaturas")
         
 
+        
+        return dock
+        
+    def crear_grafico_doble_serie(lista1, lista2, titulo="Gráfico de 2 series") -> QChartView:
+        # Crear series
+        serie1 = QLineSeries()
+        serie1.setName("Serie 1")
+        for i, valor in enumerate(lista1):
+            serie1.append(QPointF(i, valor))
+
+        serie2 = QLineSeries()
+        serie2.setName("Serie 2")
+        for i, valor in enumerate(lista2):
+            serie2.append(QPointF(i, valor))
+
+        # Crear el gráfico y agregar las series
+        chart = QChart()
+        chart.addSeries(serie1)
+        chart.addSeries(serie2)
+        chart.setTitle(titulo)
+        chart.createDefaultAxes()  # Auto-ajusta los ejes
+        chart.legend().setVisible(True)
+
+        # Crear vista del gráfico
+        chart_view = QChartView(chart)
+        chart_view.setRenderHint(QPainter.Antialiasing)
+
+        return chart_view
        
 
 if __name__ == '__main__':
