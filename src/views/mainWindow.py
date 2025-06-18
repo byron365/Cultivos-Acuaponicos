@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'HomeZVLOLv.ui'
+## Form generated from reading UI file 'HomeUQLTMc.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.1
 ##
@@ -27,6 +27,11 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet(u"")
         self.centralWidget = QWidget(MainWindow)
         self.centralWidget.setObjectName(u"centralWidget")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.centralWidget.sizePolicy().hasHeightForWidth())
+        self.centralWidget.setSizePolicy(sizePolicy)
         self.centralWidget.setStyleSheet(u"#centralWidget{\n"
 "	background-image:url(:/Img/bg.png);\n"
 "}")

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dataViewBZMciS.ui'
+## Form generated from reading UI file 'dataViewpJXqOw.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.1
 ##
@@ -25,7 +25,7 @@ class Ui_DataView(object):
             DataView.setObjectName(u"DataView")
         DataView.resize(550, 500)
         DataView.setMinimumSize(QSize(0, 500))
-        DataView.setMaximumSize(QSize(600, 500))
+        DataView.setMaximumSize(QSize(1000, 500))
         DataView.setStyleSheet(u"#Main{\n"
 "	background-color: rgba(0,0,0,0);\n"
 "}\n"

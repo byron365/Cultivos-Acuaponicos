@@ -332,3 +332,51 @@ def varianza(lista):
         varianza = suma_cuadrados / len(datos)  # Para población completa
 
         return round(varianza,2)
+    
+def ConvertirAnumero(valores):#Esta funcion convierte texto a numeros
+        datos = []
+        control = False
+        for d in valores:
+            try:
+                float(d)
+                control = True
+            except:
+                control = False
+
+            if control:
+                datos.append(float(d))
+            else:
+                datos.append(0)
+        return datos
+
+def filtroDiaHora(data, objetivo): #Funcion para filtrar fechas por dia, obteniendo como se comporta los valores cada hora
+        fechas = data["fechas"][1:]
+        valores = data["valores"][1:]
+        datos = ConvertirAnumero(valores)
+        
+        tiemposHora =[]
+        tiempos = []
+        valorEnTiempo = []
+        fechasFiltradas = []
+        
+        #Separando fechas repetidas
+        for f in fechas:
+            if not f[0:10] in fechasFiltradas and not "fecha_" in f[0:10]:
+                fechasFiltradas.append(f[0:10])
+                #print(f[0:10])
+
+        #Filtrando fechas segun objetivo
+        for i, f in enumerate(fechas):
+            if f[0:10] == objetivo and not "fecha_" in f[0:10]:
+               if not f[11:13] in tiemposHora:#Filtrando por hora minutos
+                tiemposHora.append(f[11:13])
+                tiempos.append(f[11:19])
+                valorEnTiempo.append(round(datos[i],2))
+                #print(f"datos:  {datos[i]} fechas: {len(fechas)} valores: {len(valores)}")
+                #print(f"{f[0:10]} --- {f[11:13]}---{f[11:19]}---{round(float(valores[i]),2)}")
+        
+        return {
+            "tiempo": tiempos,
+            "valores": valorEnTiempo,
+            "fechas": fechasFiltradas
+        }

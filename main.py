@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget, QDockWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget, QDockWidget,QVBoxLayout
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
 from PySide6.QtCore import Qt,QDateTime,QPointF, QMargins, QSize
 from PySide6.QtGui import QPainter,QBrush, QColor
@@ -12,6 +12,7 @@ from src.views.components.graph import Ui_lineGraph
 from src.views.mainWindow import Ui_MainWindow
 from src.views.mainCtn import Ui_mainCtn
 from typing import List, Dict, Union
+from tools.tools import ConvertirAnumero, filtroDiaHora
 
 
 #------------------Clases para las vistas--------------------------
@@ -57,7 +58,7 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
 
         #Cambiando grafica segun dia por medio de los botones
         self.count = 0
-        self.fechasSeparadas = self.filtroDiaHora(data,"")
+        self.fechasSeparadas = filtroDiaHora(data,"")
         #print(self.fechasSeparadas)
         self.maxDateBtn.clicked.connect(self.changeMaxDate)
         self.minDateBtn.clicked.connect(self.changeMinDate)
@@ -89,7 +90,7 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
     def lineGraph(self,data,objetivo):
         #Todo: Creando el grafico en base a las horas y valores
         #Filtrando fechas por dia especifico
-        datosFiltrados = self.filtroDiaHora(data,objetivo)
+        datosFiltrados = filtroDiaHora(data,objetivo)
 
         horas = datosFiltrados["tiempo"]
         valores = datosFiltrados["valores"]
@@ -135,50 +136,8 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
         return chart_view
        
     
-    #Funcion para filtrar fechas por dia, obteniendo como se comporta los valores cada hora
-    def filtroDiaHora(self,data, objetivo):
-        fechas = data["fechas"][1:]
-        valores = data["valores"][1:]
-        datos = []
-        control = False
-        for d in valores:
-            try:
-                float(d)
-                control = True
-            except:
-                control = False
-
-            if control:
-                datos.append(float(d))
-            else:
-                datos.append(0)
-        
-        tiemposHora =[]
-        tiempos = []
-        valorEnTiempo = []
-        fechasFiltradas = []
-        
-        #Separando fechas repetidas
-        for f in fechas:
-            if not f[0:10] in fechasFiltradas and not "fecha_" in f[0:10]:
-                fechasFiltradas.append(f[0:10])
-                #print(f[0:10])
-
-        #Filtrando fechas segun objetivo
-        for i, f in enumerate(fechas):
-            if f[0:10] == objetivo and not "fecha_" in f[0:10]:
-               if not f[11:13] in tiemposHora:#Filtrando por hora minutos
-                tiemposHora.append(f[11:13])
-                tiempos.append(f[11:19])
-                valorEnTiempo.append(round(datos[i],2))
-                #print(f"datos:  {datos[i]} fechas: {len(fechas)} valores: {len(valores)}")
-                #print(f"{f[0:10]} --- {f[11:13]}---{f[11:19]}---{round(float(valores[i]),2)}")
-        
-        return {
-            "tiempo": tiempos,
-            "valores": valorEnTiempo,
-            "fechas": fechasFiltradas
-        }
+   
+    
         
         
 
@@ -220,50 +179,54 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
     def dashBoardCreate(self):#Funcion que evalua si se puede crear el dashboard al precionar el boton
         projectName = self.createView.nameLE.text()
-        if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
-            QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
-        else:
-            paths = [self.createView.LeTa.text(), self.createView.LeTe.text(),
-                 self.createView.LePh.text(),self.createView.LePpm.text(),
-                 self.createView.LeHum.text(),self.createView.LeLuz.text()]
-            
-            self.valido = False
-
-            for p in paths:#Filtrando, si alguna url no se encuentra vacia se puede crear el dashboard
-                if p.strip():
-                    self.valido = True
-                    break
-
-           
-            if self.valido:
-                result = createProject(projectName,paths)
-
-                if result['type'] == 'SUCCESS':
-                    #Abriendo dashboard
-                    self.dashView = DashView()
-                    self.centralCtn.removeWidget(self.createView)#Eliminado contenido inicial
-                    self.createView.setParent(None)
-                    self.createView.deleteLater()
-                    self.centralCtn.addWidget(self.dashView)#Agregando contenido de la vista de crear dashboard
-                    self.showMaximized()#Se coloca la ventana al ancho de la pantalla
-                    self.setWindowTitle(f"Cultivos Acuaponicos - [{projectName}]")
-
-                    #Estructurando datos para enviarlos al dashView
-                    data = StructData(projectName)
-
-                    #Agregando componentes al dashView
-                    for de,val in data.items():
-                        if val["Max"]["valor"]:
-                            self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
-                            #Creando dokcs
-                    
-                    self.addDockWidget(Qt.LeftDockWidgetArea,self.docksCreate(projectName,data))#anadiendo dock
-                    
-                elif result['type'] == "WARNING":
-                    QMessageBox.warning(self,"Ocurrio un error", result['msg'])
+        if os.path.exists(os.path.join("./Data")):
+            if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
+                QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
             else:
-                QMessageBox.warning(self,"Rutas invalidadas", "Las rutas a los archivos .csv se encuentran vacías")
+                paths = [self.createView.LeTa.text(), self.createView.LeTe.text(),
+                    self.createView.LePh.text(),self.createView.LePpm.text(),
+                    self.createView.LeHum.text(),self.createView.LeLuz.text()]
+                
+                self.valido = False
 
+                for p in paths:#Filtrando, si alguna url no se encuentra vacia se puede crear el dashboard
+                    if p.strip():
+                        self.valido = True
+                        break
+
+            
+                if self.valido:
+                    result = createProject(projectName,paths)
+
+                    if result['type'] == 'SUCCESS':
+                        #Abriendo dashboard
+                        self.dashView = DashView()
+                        self.centralCtn.removeWidget(self.createView)#Eliminado contenido inicial
+                        self.createView.setParent(None)
+                        self.createView.deleteLater()
+                        self.centralCtn.addWidget(self.dashView)#Agregando contenido de la vista de crear dashboard
+                        self.showMaximized()#Se coloca la ventana al ancho de la pantalla
+                        self.setWindowTitle(f"Cultivos Acuaponicos - [{projectName}]")
+
+                        #Estructurando datos para enviarlos al dashView
+                        data = StructData(projectName)
+
+                        #Agregando componentes al dashView
+                        for de,val in data.items():
+                            if val["Max"]["valor"]:
+                                self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
+                                #Creando dokcs
+                        
+                        self.addDockWidget(Qt.RightDockWidgetArea,self.docksCreate("Datos relacionados",data,"Right"))#anadiendo dock de datos relacionados
+                        self.addDockWidget(Qt.LeftDockWidgetArea,self.docksCreate("Datos Varios",data, "Left"))#dock de datos varios
+                        
+                    elif result['type'] == "WARNING":
+                        QMessageBox.warning(self,"Ocurrio un error", result['msg'])
+                else:
+                    QMessageBox.warning(self,"Rutas invalidadas", "Las rutas a los archivos .csv se encuentran vacías")
+        else:
+            os.mkdir(os.path.join("./Data"))#Si no existe la carpeta la creara
+            QMessageBox.warning(self,"Carpeta de datos no encontrada", "La carapeta [Data] no se encontro, por lo que se cre de nuevo, intenta otra vez")
 
     def searchPath1(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
@@ -290,50 +253,65 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.createView.LeLuz.setText(ruta[0])
 
 
-    def docksCreate(self,title, data): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
+    def docksCreate(self,title, data, LR="Right"): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
         dock = QDockWidget()
         dock.setWindowTitle(title)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        dock.resize(400,100)
-        dock.setMinimumSize(QSize(400, 100))
-        dock.setMaximumSize(QSize(400, 100))
+        dock.resize(400,400)
+        dock.setMinimumSize(QSize(400, 400))
+        dock.setMaximumSize(QSize(400, 400))
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
-        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea|Qt.DockWidgetArea.RightDockWidgetArea)
 
         #Filtrando informacion para construir los graficos
-        if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
-            print("Tenemos ambas temperaturas")
-        
+        dataX = ""
+        dataY = ""
+        titulo = ""
+        objetivo = "2024-11-06"
+        if LR == "Right":#Dock lado derecho
+            if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
+                print("Tenemos ambas temperaturas")
+                #Generando grafico de TempE Vs TempA
+                dataX = filtroDiaHora(data["temperaturaA"],objetivo)#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+                dataY = filtroDiaHora(data["temperaturaE"],objetivo)
+                titulo = f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}"
+        elif LR == "Left":#Dock Lado izquierdo
+            if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
+                print("Tenemos ambas temperaturas")
+                #Generando grafico de TempE Vs TempA
+                dataX = filtroDiaHora(data["temperaturaA"],objetivo)#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+                dataY = filtroDiaHora(data["temperaturaE"],objetivo)
+              
 
-        
+        grafios = self.crearGraficoDock(dataX["valores"], dataY["valores"],titulo)    
+        widget = QWidget()#Dommy widget para agregar graficos al dock
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(grafios)   
+        dock.setWidget(widget)
         return dock
         
-    def crear_grafico_doble_serie(lista1, lista2, titulo="Gráfico de 2 series") -> QChartView:
+    def crearGraficoDock(self,xD, yD, titulo) -> QChartView:
         # Crear series
-        serie1 = QLineSeries()
-        serie1.setName("Serie 1")
-        for i, valor in enumerate(lista1):
-            serie1.append(QPointF(i, valor))
+        series = QLineSeries()
+        for x, y in zip(xD, yD):
+            series.append(x, y)
 
-        serie2 = QLineSeries()
-        serie2.setName("Serie 2")
-        for i, valor in enumerate(lista2):
-            serie2.append(QPointF(i, valor))
-
-        # Crear el gráfico y agregar las series
         chart = QChart()
-        chart.addSeries(serie1)
-        chart.addSeries(serie2)
+        chart.addSeries(series)
+        chart.createDefaultAxes()
         chart.setTitle(titulo)
-        chart.createDefaultAxes()  # Auto-ajusta los ejes
-        chart.legend().setVisible(True)
+        chart.legend().hide()#Quita la leyenda
 
-        # Crear vista del gráfico
         chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.Antialiasing)
 
-        return chart_view
-       
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.addWidget(chart_view)
+
+        return widget
+    
+    
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
