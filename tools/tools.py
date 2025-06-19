@@ -114,37 +114,28 @@ def ordenarDatos(pn):
     }
     dPath = os.path.join(dataDir,pn)
     fPath = os.path.join(dPath,f"{pn}.csv")
-    dataCol = []
-    nf = len(os.listdir(dPath))
-    print(nf)
+    colExt = extraer_columnas_csv(fPath)
+    for c,v in colExt.items():
+        print(c)
+        if c == "fecha_0":
+            datos["temperaturaA"]["fechas"] = colExt["fecha_0"]
+            datos["temperaturaA"]["valores"] = colExt["valor_0"]
+        elif c == "fecha_1":
+            datos["temperaturaE"]["fechas"] = colExt["fecha_1"]
+            datos["temperaturaE"]["valores"] = colExt["valor_1"]
+        elif c == "fecha_2":
+            datos["ph"]["fechas"] = colExt["fecha_2"]
+            datos["ph"]["valores"] = colExt["valor_2"]
+        elif c == "fecha_3":
+            datos["ppm"]["fechas"] = colExt["fecha_3"]
+            datos["ppm"]["valores"] = colExt["valor_3"]
+        elif c == "fecha_4":
+            datos["humedad"]["fechas"] = colExt["fecha_4"]
+            datos["humedad"]["valores"] = colExt["valor_4"]
+        elif c == "fecha_5":
+            datos["luz"]["fechas"] = colExt["fecha_5"]
+            datos["luz"]["valores"] = colExt["valor_5"]
 
-    #Separando columnas del archivo de datos
-    for i in range(0,nf*2):#Se ejecutara la cantidad total de columnas de cada archivo del proyecto sin contar el unido
-        dataCol.append(leer_columna_csv(fPath,i))
-    #print(dataCol[1][0])
-    
-    #Organizando datos por fechas y valores
-    for i in range(0, nf, 2):
-        print(f"Los que llegaron {dataCol[i][0][-1]}")
-        match dataCol[i][0][-1]:
-            case "0": #La columna corresponde a la temperatura ambiente
-                datos["temperaturaA"]["fechas"] = dataCol[i]
-                datos["temperaturaA"]["valores"] = dataCol[i+1]
-            case "1": #La columna corresponde a la temperatura de Estanque
-                datos["temperaturaE"]["fechas"] = dataCol[i]
-                datos["temperaturaE"]["valores"] = dataCol[i+1]
-            case "2": #La columna corresponde al ph
-                datos["ph"]["fechas"] = dataCol[i]
-                datos["ph"]["valores"] = dataCol[i+1]
-            case "3": #La columna corresponde a las ppm
-                datos["ppm"]["fechas"] = dataCol[i]
-                datos["ppm"]["valores"] = dataCol[i+1]
-            case "4": #La columna corresponde a la humedad
-                datos["humedad"]["fechas"] = dataCol[i]
-                datos["humedad"]["valores"] = dataCol[i+1]
-            case "5": #La columna corresponde a la luz
-                datos["luz"]["fechas"] = dataCol[i]
-                datos["luz"]["valores"] = dataCol[i+1]
     
     return datos
 
@@ -164,33 +155,6 @@ def extraer_columnas_csv(ruta_archivo):#Extrae la informacion de cada columna po
                 columnas[encabezado].append(fila[encabezado])
     
     return columnas
-
-
-def leer_columna_csv(ruta_csv, indice_columna):
-    print(f"Inidice de la columna {indice_columna}")
-    colExt = extraer_columnas_csv(ruta_csv)
-    for c,v in colExt.Items():
-        print(f"La clave es {c}")
-    """
-    Lee una columna específica de un archivo CSV y devuelve sus elementos en una lista.
-    
-    Parámetros:
-        ruta_csv (str): Ruta del archivo CSV.
-        indice_columna (int): Índice de la columna que se desea extraer (empezando desde 0).
-        
-    Retorna:
-        list: Lista con los elementos de la columna.
-    """
-    columna = []
-    with open(ruta_csv, newline='', encoding='utf-8') as archivo:
-        lector = csv.reader(archivo)
-        for fila in lector:
-            if len(fila) >= indice_columna:
-                columna.append(fila[indice_columna])
-            else:
-                continue
-    return columna
-
 #Funcion para encontrar el mayor dato y su o sus correspondientes fechas
 def mayor_dato(dataList, dateList):
     if not dataList:
