@@ -226,7 +226,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     QMessageBox.warning(self,"Rutas invalidadas", "Las rutas a los archivos .csv se encuentran vacías")
         else:
             os.mkdir(os.path.join("./Data"))#Si no existe la carpeta la creara
-            QMessageBox.warning(self,"Carpeta de datos no encontrada", "La carapeta [Data] no se encontro, por lo que se cre de nuevo, intenta otra vez")
+            QMessageBox.warning(self,"Carpeta de datos no encontrada", "La carapeta [Data] no se encontro, por lo que se creo, intenta de nuevo")
 
     def searchPath1(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
@@ -259,34 +259,46 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         dock.resize(400,400)
         dock.setMinimumSize(QSize(400, 400))
-        dock.setMaximumSize(QSize(400, 400))
+        dock.setMaximumSize(QSize(400, 1200))
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
-
+        for d,v in data.items():
+            if v["valores"]:
+                print(v["title"])
         #Filtrando informacion para construir los graficos
-        dataX = ""
-        dataY = ""
-        titulo = ""
+        dataX = []
+        dataY = []
+        titulo = []
         objetivo = "2024-11-06"
+        #Filtrando para generar graficos
         if LR == "Right":#Dock lado derecho
+            #---------TempA Vs TempE--------
             if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
-                print("Tenemos ambas temperaturas")
-                #Generando grafico de TempE Vs TempA
-                dataX = filtroDiaHora(data["temperaturaA"],objetivo)#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
-                dataY = filtroDiaHora(data["temperaturaE"],objetivo)
-                titulo = f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}"
+                dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+                dataY.append(filtroDiaHora(data["temperaturaE"],objetivo))
+                titulo.append(f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}")
+
+            #---------TempA Vs Humedad--------
+            if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
+                dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+                dataY.append(filtroDiaHora(data["humedad"],objetivo))
+                titulo.append(f"{data["temperaturaA"]["title"]} VS {data["humedad"]["title"]} - {objetivo}")
         elif LR == "Left":#Dock Lado izquierdo
             if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
                 print("Tenemos ambas temperaturas")
                 #Generando grafico de TempE Vs TempA
-                dataX = filtroDiaHora(data["temperaturaA"],objetivo)#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
-                dataY = filtroDiaHora(data["temperaturaE"],objetivo)
+                dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+                dataY.append(filtroDiaHora(data["temperaturaE"],objetivo))
+                titulo.append(f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}")
               
-
-        grafios = self.crearGraficoDock(dataX["valores"], dataY["valores"],titulo)    
+        #grafios = self.crearGraficoDock(dataX["valores"], dataY["valores"],titulo)   
         widget = QWidget()#Dommy widget para agregar graficos al dock
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(grafios)   
+
+        #Anadiendo graficos al dock
+        for i,g in enumerate(dataX):
+            layout.addWidget(self.crearGraficoDock(dataX[i]["valores"], dataY[i]["valores"],titulo[i])) 
+
         dock.setWidget(widget)
         return dock
         

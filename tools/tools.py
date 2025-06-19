@@ -119,12 +119,13 @@ def ordenarDatos(pn):
     print(nf)
 
     #Separando columnas del archivo de datos
-    for i in range(nf*2):#Se ejecutara la cantidad total de columnas de cada archivo del proyecto sin contar el unido
+    for i in range(0,nf*2):#Se ejecutara la cantidad total de columnas de cada archivo del proyecto sin contar el unido
         dataCol.append(leer_columna_csv(fPath,i))
     #print(dataCol[1][0])
     
     #Organizando datos por fechas y valores
     for i in range(0, nf, 2):
+        print(f"Los que llegaron {dataCol[i][0][-1]}")
         match dataCol[i][0][-1]:
             case "0": #La columna corresponde a la temperatura ambiente
                 datos["temperaturaA"]["fechas"] = dataCol[i]
@@ -149,6 +150,7 @@ def ordenarDatos(pn):
 
 
 def leer_columna_csv(ruta_csv, indice_columna):
+    print(f"Inidice de la columna {indice_columna}")
     """
     Lee una columna específica de un archivo CSV y devuelve sus elementos en una lista.
     
@@ -163,7 +165,7 @@ def leer_columna_csv(ruta_csv, indice_columna):
     with open(ruta_csv, newline='', encoding='utf-8') as archivo:
         lector = csv.reader(archivo)
         for fila in lector:
-            if len(fila) > indice_columna:
+            if len(fila) >= indice_columna:
                 columna.append(fila[indice_columna])
             else:
                 continue
