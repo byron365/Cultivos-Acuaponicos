@@ -148,9 +148,29 @@ def ordenarDatos(pn):
     
     return datos
 
+def extraer_columnas_csv(ruta_archivo):#Extrae la informacion de cada columna por separado y retorna un diccionario
+    columnas = {}
+    
+    with open(ruta_archivo, mode='r', encoding='utf-8') as archivo:
+        lector = csv.DictReader(archivo)
+        
+        # Inicializar listas vacías para cada encabezado
+        for encabezado in lector.fieldnames:
+            columnas[encabezado] = []
+        
+        # Agregar los datos a cada lista
+        for fila in lector:
+            for encabezado in lector.fieldnames:
+                columnas[encabezado].append(fila[encabezado])
+    
+    return columnas
+
 
 def leer_columna_csv(ruta_csv, indice_columna):
     print(f"Inidice de la columna {indice_columna}")
+    colExt = extraer_columnas_csv(ruta_csv)
+    for c,v in colExt.Items():
+        print(f"La clave es {c}")
     """
     Lee una columna específica de un archivo CSV y devuelve sus elementos en una lista.
     
