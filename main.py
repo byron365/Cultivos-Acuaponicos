@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget, QDockWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QWidget, QDockWidget,QVBoxLayout,QScrollArea
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
 import random
 from PySide6.QtCore import Qt,QDateTime,QPointF, QMargins, QSize
@@ -12,7 +12,9 @@ from src.views.components.dataView import Ui_DataView
 from src.views.components.graph import Ui_lineGraph
 from src.views.mainWindow import Ui_MainWindow
 from src.views.mainCtn import Ui_mainCtn
+from src.views.components.Dock import Ui_DockWidget
 from typing import List, Dict, Union
+from tools.tools import ConvertirAnumero, filtroDiaHora
 
 
 #------------------Clases para las vistas--------------------------
@@ -58,7 +60,7 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
 
         #Cambiando grafica segun dia por medio de los botones
         self.count = 0
-        self.fechasSeparadas = self.filtroDiaHora(data,"")
+        self.fechasSeparadas = filtroDiaHora(data,"")
         #print(self.fechasSeparadas)
         self.maxDateBtn.clicked.connect(self.changeMaxDate)
         self.minDateBtn.clicked.connect(self.changeMinDate)
@@ -69,7 +71,7 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
 
         
 
-    def changeMaxDate(self,):
+    def changeMaxDate(self):
         if self.count < len(self.fechasSeparadas):
             self.count += 1
             #Mostradno grafico
@@ -90,7 +92,7 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
     def lineGraph(self,data,objetivo):
         #Todo: Creando el grafico en base a las horas y valores
         #Filtrando fechas por dia especifico
-        datosFiltrados = self.filtroDiaHora(data,objetivo)
+        datosFiltrados = filtroDiaHora(data,objetivo)
 
         horas = datosFiltrados["tiempo"]
         valores = datosFiltrados["valores"]
@@ -136,50 +138,127 @@ class DataView(QWidget, Ui_DataView):#Componente para mostrar informacion de una
         return chart_view
        
     
-    #Funcion para filtrar fechas por dia, obteniendo como se comporta los valores cada hora
-    def filtroDiaHora(self,data, objetivo):
-        fechas = data["fechas"][1:]
-        valores = data["valores"][1:]
-        datos = []
-        control = False
-        for d in valores:
-            try:
-                float(d)
-                control = True
-            except:
-                control = False
+class DockComponent(QDockWidget, Ui_DockWidget):#Componente para mostrar informacion en un Dock
+    def __init__(self,titulo,data, LR="Right"):
+        super().__init__()
+        self.setupUi(self)
+        self.setWindowTitle(titulo)
 
-            if control:
-                datos.append(float(d))
-            else:
-                datos.append(0)
-        
-        tiemposHora =[]
-        tiempos = []
-        valorEnTiempo = []
-        fechasFiltradas = []
-        
-        #Separando fechas repetidas
-        for f in fechas:
-            if not f[0:10] in fechasFiltradas and not "fecha_" in f[0:10]:
-                fechasFiltradas.append(f[0:10])
-                #print(f[0:10])
+        #Filtrando informacion para construir los graficos
+        #Cambiando grafica segun dia por medio de los botones
+        self.data = data
+        self.count = 0
+        self.fechasSeparadas = []
+        for c,v in data.items():
+            if v["fechas"]:
+                self.fechasSeparadas = filtroDiaHora(v,"")
+                break
 
-        #Filtrando fechas segun objetivo
-        for i, f in enumerate(fechas):
-            if f[0:10] == objetivo and not "fecha_" in f[0:10]:
-               if not f[11:13] in tiemposHora:#Filtrando por hora minutos
-                tiemposHora.append(f[11:13])
-                tiempos.append(f[11:19])
-                valorEnTiempo.append(round(datos[i],2))
-                #print(f"datos:  {datos[i]} fechas: {len(fechas)} valores: {len(valores)}")
-                #print(f"{f[0:10]} --- {f[11:13]}---{f[11:19]}---{round(float(valores[i]),2)}")
-        
-        return {
-            "tiempo": tiempos,
-            "valores": valorEnTiempo,
-            "fechas": fechasFiltradas
-        }
+        self.nextDateBtn.clicked.connect(self.changeMaxDate)
+        self.prevDateBtn.clicked.connect(self.changeMinDate)
+        self.dataX = []
+        self.dataY = []
+        self.titulo = []
+        self.objetivo = self.fechasSeparadas["fechas"][self.count]
+        self.dateLB.setText(self.objetivo)
+        #Filtrando para generar graficos
+        if LR == "Right":#Dock lado derecho
+           self.GraficosRight(self.data)#Generando los graficos del dock derecho
+        elif LR == "Left":#Dock Lado izquierdo
+            if (self.data["temperaturaA"]["valores"] and self.data["temperaturaE"]["valores"]):
+                print("Tenemos ambas temperaturas")
+                #Generando grafico de TempE Vs TempA
+                self.dataX.append(filtroDiaHora(self.data["temperaturaA"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+                self.dataY.append(filtroDiaHora(self.data["temperaturaE"],self.objetivo))
+                self.titulo.append(f"{self.data["temperaturaA"]["title"]} VS {self.data["temperaturaE"]["title"]} - {self.objetivo}")
+
+        # #Anadiendo graficos al dock
+        self.graficos = []
+        for i,g in enumerate(self.dataX):
+            self.graficos.append(self.crearGraficoDock(self.dataX[i]["valores"], self.dataY[i]["valores"],self.titulo[i]))
+            self.scrollItems.addWidget(self.graficos[i])
+
+    def crearGraficoDock(self,xD, yD, titulo) -> QChartView:
+        # Crear series
+        series = QLineSeries()
+        for x, y in zip(xD, yD):
+            series.append(x, y)
+
+        chart = QChart()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.setTitle(titulo)
+        chart.legend().hide()#Quita la leyenda
+
+        chart_view = QChartView(chart)
+        chart_view.setRenderHint(QPainter.Antialiasing)
+
+        widget = QWidget()
+        widget.setMinimumSize(QSize(400,400))
+        layout = QVBoxLayout(widget)
+        layout.addWidget(chart_view)
+
+        return widget
+     
+    def changeMaxDate(self):
+        if self.count < len(self.fechasSeparadas):
+            self.count += 1
+            self.objetivo = self.fechasSeparadas["fechas"][self.count]
+            self.GraficosRight(self.data)
+            #Mostradno grafico
+            for i,g in enumerate(self.graficos):
+                self.scrollItems.removeWidget(self.graficos[i])#Removemos los graficos anteriores
+                self.graficos[i].deleteLater()
+                self.graficos[i] = self.crearGraficoDock(self.dataX[i]["valores"], self.dataY[i]["valores"],self.titulo[i])#Creamos el nuevo grafico
+                self.scrollItems.addWidget(self.graficos[i])#Loagregamos
+            
+            self.dateLB.setText(self.objetivo)
+    
+    def changeMinDate(self):
+        if self.count > 0:
+            self.count -= 1    
+            self.objetivo = self.fechasSeparadas["fechas"][self.count]
+            self.GraficosRight(self.data)
+            #Mostradno grafico
+            for i,g in enumerate(self.graficos):
+                self.scrollItems.removeWidget(self.graficos[i])#Removemos los graficos anteriores
+                self.graficos[i].deleteLater()
+                self.graficos[i] = self.crearGraficoDock(self.dataX[i]["valores"], self.dataY[i]["valores"],self.titulo[i])#Creamos el nuevo grafico
+                self.scrollItems.addWidget(self.graficos[i])#Loagregamos
+            
+            self.dateLB.setText(self.objetivo)
+    def GraficosRight(self,data):#Actualiza los graficos del dock derecho
+         #---------TempA Vs TempE--------
+        if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
+            self.dataX.append(filtroDiaHora(data["temperaturaA"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+            self.dataY.append(filtroDiaHora(data["temperaturaE"],self.objetivo))
+            self.titulo.append(f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {self.objetivo}")
+        #---------TempA Vs Humedad--------
+        if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
+            self.dataX.append(filtroDiaHora(data["temperaturaA"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+            self.dataY.append(filtroDiaHora(data["humedad"],self.objetivo))
+            self.titulo.append(f"{data["temperaturaA"]["title"]} VS {data["humedad"]["title"]} - {self.objetivo}")
+            #---------TempE Vs Ph--------
+        if (data["temperaturaE"]["valores"] and data["ph"]["valores"]):
+            self.dataX.append(filtroDiaHora(data["temperaturaE"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+            self.dataY.append(filtroDiaHora(data["ph"],self.objetivo))
+            self.titulo.append(f"{data["temperaturaE"]["title"]} VS {data["ph"]["title"]} - {self.objetivo}")
+            #---------ppm Vs ph--------
+        if (data["ppm"]["valores"] and data["ph"]["valores"]):
+            self.dataX.append(filtroDiaHora(data["ppm"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+            self.dataY.append(filtroDiaHora(data["ph"],self.objetivo))
+            self.titulo.append(f"{data["ppm"]["title"]} VS {data["ph"]["title"]} - {self.objetivo}")
+        #---------luz Vs ph--------
+        if (data["luz"]["valores"] and data["ph"]["valores"]):
+            self.dataX.append(filtroDiaHora(data["luz"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+            self.dataY.append(filtroDiaHora(data["ph"],self.objetivo))
+            self.titulo.append(f"{data["luz"]["title"]} VS {data["ph"]["title"]} - {self.objetivo}")
+        #---------TempE Vs ppm--------
+        if (data["temperaturaE"]["valores"] and data["ppm"]["valores"]):
+            self.dataX.append(filtroDiaHora(data["temperaturaE"],self.objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+            self.dataY.append(filtroDiaHora(data["ppm"],self.objetivo))
+            self.titulo.append(f"{data["temperaturaE"]["title"]} VS {data["ppm"]["title"]} - {self.objetivo}")
+
         
         
 
@@ -221,6 +300,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
     def dashBoardCreate(self):#Funcion que evalua si se puede crear el dashboard al precionar el boton
         projectName = self.createView.nameLE.text()
+<<<<<<< HEAD
         if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
             QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
         else:
@@ -268,9 +348,56 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     #No hay grafico para mostrar
                 elif result['type'] == "WARNING":
                     QMessageBox.warning(self,"Ocurrio un error", result['msg'])
+=======
+        if os.path.exists(os.path.join("./Data")):
+            if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
+                QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
+>>>>>>> docks
             else:
-                QMessageBox.warning(self,"Rutas invalidadas", "Las rutas a los archivos .csv se encuentran vacías")
+                paths = [self.createView.LeTa.text(), self.createView.LeTe.text(),
+                    self.createView.LePh.text(),self.createView.LePpm.text(),
+                    self.createView.LeHum.text(),self.createView.LeLuz.text()]
+                
+                self.valido = False
 
+                for p in paths:#Filtrando, si alguna url no se encuentra vacia se puede crear el dashboard
+                    if p.strip():
+                        self.valido = True
+                        break
+
+            
+                if self.valido:
+                    result = createProject(projectName,paths)
+
+                    if result['type'] == 'SUCCESS':
+                        #Abriendo dashboard
+                        self.dashView = DashView()
+                        self.centralCtn.removeWidget(self.createView)#Eliminado contenido inicial
+                        self.createView.setParent(None)
+                        self.createView.deleteLater()
+                        self.centralCtn.addWidget(self.dashView)#Agregando contenido de la vista de crear dashboard
+                        self.showMaximized()#Se coloca la ventana al ancho de la pantalla
+                        self.setWindowTitle(f"Cultivos Acuaponicos - [{projectName}]")
+
+                        #Estructurando datos para enviarlos al dashView
+                        data = StructData(projectName)
+
+                        #Agregando componentes al dashView
+                        for de,val in data.items():
+                            if val["Max"]["valor"]:
+                                self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
+                                #Creando dokcs
+                        
+                        self.addDockWidget(Qt.RightDockWidgetArea,DockComponent("Información relacionada",data,"Right"))#anadiendo dock de datos relacionados
+                        self.addDockWidget(Qt.LeftDockWidgetArea,DockComponent("Información varia",data,"Left"))#dock de datos varios
+                        
+                    elif result['type'] == "WARNING":
+                        QMessageBox.warning(self,"Ocurrio un error", result['msg'])
+                else:
+                    QMessageBox.warning(self,"Rutas invalidadas", "Las rutas a los archivos .csv se encuentran vacías")
+        else:
+            os.mkdir(os.path.join("./Data"))#Si no existe la carpeta la creara
+            QMessageBox.warning(self,"Carpeta de datos no encontrada", "La carapeta [Data] no se encontro, por lo que se creo, intenta de nuevo")
 
     def searchPath1(self):
         ruta = QFileDialog.getOpenFileName(self,"Selecciona un archivo .csv","","Archivos CSV (*.csv)")
@@ -297,6 +424,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.createView.LeLuz.setText(ruta[0])
 
 
+<<<<<<< HEAD
     def docksCreate(self,title, data1,data2): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
         dock = QDockWidget()
         dock.setWindowTitle(title)
@@ -311,10 +439,83 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
         
         
-
+=======
+    def docksCreate(self,title, data, LR="Right"): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
+        dock = DockComponent()
+        dock.setWindowTitle(title)
         
+        # dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        # dock.resize(400,400)
+        # dock.setMinimumSize(QSize(400, 400))
+        # dock.setMaximumSize(QSize(400, 1000))
+        # dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
+
+        #Filtrando informacion para construir los graficos
+        self.dataX = []
+        self.dataY = []
+        titulo = []
+        objetivo = "2024-11-06"
+        #Filtrando para generar graficos
+        # if LR == "Right":#Dock lado derecho
+        #     #---------TempA Vs TempE--------
+        #     if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
+        #         self.dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["temperaturaE"],objetivo))
+        #         titulo.append(f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}")
+>>>>>>> docks
+
+        #     #---------TempA Vs Humedad--------
+        #     if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
+        #         self.dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["humedad"],objetivo))
+        #         titulo.append(f"{data["temperaturaA"]["title"]} VS {data["humedad"]["title"]} - {objetivo}")
+
+        #      #---------TempE Vs Ph--------
+        #     if (data["temperaturaE"]["valores"] and data["ph"]["valores"]):
+        #         self.dataX.append(filtroDiaHora(data["temperaturaE"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["ph"],objetivo))
+        #         titulo.append(f"{data["temperaturaE"]["title"]} VS {data["ph"]["title"]} - {objetivo}")
+
+        #      #---------ppm Vs ph--------
+        #     if (data["ppm"]["valores"] and data["ph"]["valores"]):
+        #         self.dataX.append(filtroDiaHora(data["ppm"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["ph"],objetivo))
+        #         titulo.append(f"{data["ppm"]["title"]} VS {data["ph"]["title"]} - {objetivo}")
+
+        #     #---------luz Vs ph--------
+        #     if (data["luz"]["valores"] and data["ph"]["valores"]):
+        #         self.dataX.append(filtroDiaHora(data["luz"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["ph"],objetivo))
+        #         titulo.append(f"{data["luz"]["title"]} VS {data["ph"]["title"]} - {objetivo}")
+
+        #     #---------TempE Vs ppm--------
+        #     if (data["temperaturaE"]["valores"] and data["ppm"]["valores"]):
+        #         self.dataX.append(filtroDiaHora(data["temperaturaE"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["ppm"],objetivo))
+        #         titulo.append(f"{data["temperaturaE"]["title"]} VS {data["ppm"]["title"]} - {objetivo}")
+
+        # elif LR == "Left":#Dock Lado izquierdo
+        #     if (data["temperaturaA"]["valores"] and data["temperaturaE"]["valores"]):
+        #         print("Tenemos ambas temperaturas")
+        #         #Generando grafico de TempE Vs TempA
+        #         self.dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
+        #         self.dataY.append(filtroDiaHora(data["temperaturaE"],objetivo))
+        #         titulo.append(f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}")
+              
+        # scrollDock = QScrollArea()#Creando el scrollArea para colocar los graficos del dock
+        # scrollDock.setWidgetResizable(True)
+        # scrollAreaWidgetContents = QWidget()
+        # layout = QVBoxLayout(scrollDock)
+        # layout.setContentsMargins(0, 0, 0, 0)
+
+        # #Anadiendo graficos al dock
+        # for i,g in enumerate(self.dataX):
+        #     layout.addWidget(self.crearGraficoDock(self.dataX[i]["valores"], self.dataY[i]["valores"],titulo[i])) 
+
+        # dock.setWidget(scrollDock)
         return dock
         
+<<<<<<< HEAD
     def crear_grafico_doble_serie(self,lista1, lista2, titulo) -> QChartView:
         #datos1 = self.convertirANumero(lista1)
         #datos2 = self.convertirANumero(lista2)
@@ -364,6 +565,11 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                 datos1.append(0)
         
         return datos1
+=======
+    
+    
+    
+>>>>>>> docks
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
