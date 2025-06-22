@@ -116,7 +116,6 @@ def ordenarDatos(pn):
     fPath = os.path.join(dPath,f"{pn}.csv")
     colExt = extraer_columnas_csv(fPath)
     for c,v in colExt.items():
-        print(c)
         if c == "fecha_0":
             datos["temperaturaA"]["fechas"] = colExt["fecha_0"]
             datos["temperaturaA"]["valores"] = colExt["valor_0"]

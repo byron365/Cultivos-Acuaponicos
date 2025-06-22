@@ -1,2 +1,2 @@
-./Data
+./Data/.csv*
 src/views/components/__pycache__
