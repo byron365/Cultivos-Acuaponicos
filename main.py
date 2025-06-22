@@ -300,59 +300,9 @@ class MainWindow(QMainWindow,Ui_MainWindow):
 
     def dashBoardCreate(self):#Funcion que evalua si se puede crear el dashboard al precionar el boton
         projectName = self.createView.nameLE.text()
-<<<<<<< HEAD
-        if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
-            QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
-        else:
-            paths = [self.createView.LeTa.text(), self.createView.LeTe.text(),
-                 self.createView.LePh.text(),self.createView.LePpm.text(),
-                 self.createView.LeHum.text(),self.createView.LeLuz.text()]
-            
-            self.valido = False
-
-            for p in paths:#Filtrando, si alguna url no se encuentra vacia se puede crear el dashboard
-                if p.strip():
-                    self.valido = True
-                    break
-
-           
-            if self.valido:
-                result = createProject(projectName,paths)
-
-                if result['type'] == 'SUCCESS':
-                    #Abriendo dashboard
-                    self.dashView = DashView()
-                    self.centralCtn.removeWidget(self.createView)#Eliminado contenido inicial
-                    self.createView.setParent(None)
-                    self.createView.deleteLater()
-                    self.centralCtn.addWidget(self.dashView)#Agregando contenido de la vista de crear dashboard
-                    self.showMaximized()#Se coloca la ventana al ancho de la pantalla
-                    self.setWindowTitle(f"Cultivos Acuaponicos - [{projectName}]")
-                    dockTitle = ""
-
-                    #Estructurando datos para enviarlos al dashView
-                    data = StructData(projectName)
-
-                    #Agregando componentes al dashView
-                    for de,val in data.items():
-                        if val["Max"]["valor"]:
-                            self.dashView.centralCtn.addWidget(DataView(val))#Agregando informacion basica
-                    
-                    #Creando dokcs
-                    #Filtrando informacion para construir los graficos de los docks
-                    if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
-                        print("Tenemos ambas temperaturas")
-                        dockTitle = f"{data["temperaturaA"]["title"]} VS {data["humedad"]["valores"]}"
-                        self.addDockWidget(Qt.LeftDockWidgetArea,self.docksCreate(dockTitle,[random.randint(0, 100) for _ in range(10)],[random.randint(0, 100) for _ in range(10)]))#anadiendo dock
-                    
-                    #No hay grafico para mostrar
-                elif result['type'] == "WARNING":
-                    QMessageBox.warning(self,"Ocurrio un error", result['msg'])
-=======
         if os.path.exists(os.path.join("./Data")):
             if not projectName.strip() or projectName in os.listdir(os.path.join("./Data")):
                 QMessageBox.warning(self,"Nombre inválido", "El nombre ya existe o se encuentra vacío")
->>>>>>> docks
             else:
                 paths = [self.createView.LeTa.text(), self.createView.LeTe.text(),
                     self.createView.LePh.text(),self.createView.LePpm.text(),
@@ -424,22 +374,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.createView.LeLuz.setText(ruta[0])
 
 
-<<<<<<< HEAD
-    def docksCreate(self,title, data1,data2): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
-        dock = QDockWidget()
-        dock.setWindowTitle(title)
-        dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        dock.resize(400,100)
-        dock.setMinimumSize(QSize(400, 100))
-        dock.setMaximumSize(QSize(400, 100))
-        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
-        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea|Qt.DockWidgetArea.RightDockWidgetArea)
-        grafico = self.crear_grafico_doble_serie(data1,data2,title)
-        dock.setWidget(grafico)
-
-        
-        
-=======
     def docksCreate(self,title, data, LR="Right"): #Esta funcion creara los docks para colocar graficos relevantes al dashboard
         dock = DockComponent()
         dock.setWindowTitle(title)
@@ -462,7 +396,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         #         self.dataX.append(filtroDiaHora(data["temperaturaA"],objetivo))#Devovlera los valores,fechas filtradas por hora de la fecha colocada como objetivo
         #         self.dataY.append(filtroDiaHora(data["temperaturaE"],objetivo))
         #         titulo.append(f"{data["temperaturaA"]["title"]} VS {data["temperaturaE"]["title"]} - {objetivo}")
->>>>>>> docks
 
         #     #---------TempA Vs Humedad--------
         #     if (data["temperaturaA"]["valores"] and data["humedad"]["valores"]):
@@ -515,61 +448,9 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         # dock.setWidget(scrollDock)
         return dock
         
-<<<<<<< HEAD
-    def crear_grafico_doble_serie(self,lista1, lista2, titulo) -> QChartView:
-        #datos1 = self.convertirANumero(lista1)
-        #datos2 = self.convertirANumero(lista2)
-        datos1 = [random.randint(0, 100) for _ in range(10)]
-        datos2 = [random.randint(0, 100) for _ in range(10)]
-        
-        # Crear series
-        serie1 = QLineSeries()
-        serie1.setName("Serie 1")
-        for i, valor in enumerate(datos1):
-            serie1.append(QPointF(i, valor))
-
-        serie2 = QLineSeries()
-        serie2.setName("Serie 2")
-        for i, valor in enumerate(datos2):
-            serie2.append(QPointF(i, valor))
-
-        # Crear el gráfico y agregar las series
-        chart = QChart()
-        chart.addSeries(serie1)
-        chart.addSeries(serie2)
-        chart.setTitle(titulo)
-        chart.createDefaultAxes()  # Auto-ajusta los ejes
-        chart.legend().setVisible(True)
-
-        # Crear vista del gráfico
-        chart_view = QChartView(chart)
-        chart_view.setRenderHint(QPainter.Antialiasing)
-        print("Termino de procesar el grafico del dock")
-
-        return chart_view
-    
-    def convertirANumero(self,lista):
-        valores1 = lista[1:]
-        datos1 = []
-        control1 = False
-        for d in valores1:
-            try:
-                float(d)
-                control1 = True
-            except:
-                control1 = False
-
-            if control1:
-                datos1.append(float(d))
-            else:
-                datos1.append(0)
-        
-        return datos1
-=======
     
     
     
->>>>>>> docks
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
